@@ -211,20 +211,39 @@ def generate_suggestions(
 
     # 7. Persist newly generated suggestions as PENDING
     saved_suggestions = []
+    import math
     for item in orch_res.get("suggestions", []):
+        sec = item.get("section")
+        sug_txt = item.get("suggested_text")
+        req = item.get("target_requirement")
+        ev = item.get("evidence")
+        conf = item.get("confidence")
+        
+        # Explicit validation before database persistence
+        if not sec or not sec.strip():
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Suggestion rejected: missing 'section'")
+        if not sug_txt or not sug_txt.strip():
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Suggestion rejected: missing 'suggested_text'")
+        if not req or not req.strip():
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Suggestion rejected: missing 'target_requirement'")
+        if not ev or not ev.strip():
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Suggestion rejected: missing 'evidence'")
+        if conf is None or math.isnan(conf) or conf < 0.0 or conf > 1.0:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Suggestion rejected: invalid 'confidence' value")
+            
         sug_db = AISuggestion(
             id=uuid.uuid4(),
             user_id=current_user.id,
             job_id=job.id,
-            section=item["section"],
-            original_text=item["original_text"],
-            suggested_text=item["suggested_text"],
-            suggestion_type=item["suggestion_type"],
-            target_requirement=item["target_requirement"],
-            rationale=item["rationale"],
-            evidence=item["evidence"],
-            evidence_status=item["evidence_status"],
-            confidence=item["confidence"],
+            section=sec.strip(),
+            original_text=item.get("original_text", "").strip(),
+            suggested_text=sug_txt.strip(),
+            suggestion_type=item.get("suggestion_type", "").strip(),
+            target_requirement=req.strip(),
+            rationale=item.get("rationale", "").strip(),
+            evidence=ev.strip(),
+            evidence_status=item.get("evidence_status", "SUPPORTED").strip(),
+            confidence=conf,
             requires_user_approval=item.get("requires_user_approval", True),
             status="PENDING"
         )

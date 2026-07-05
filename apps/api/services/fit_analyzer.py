@@ -301,29 +301,31 @@ def analyze_fit_deterministic(profile_json: dict, extracted_requirements: dict) 
         
     if total_weight > 0:
         match_score = round((earned_weight / total_weight) * 100)
-    else:
-        match_score = 100
         
-    meets_exp = True
-    if req_years is not None:
-        candidate_years = parse_total_experience_years(profile_json.get("work_experience", []))
-        if candidate_years < req_years:
-            meets_exp = False
+        meets_exp = True
+        if req_years is not None:
+            candidate_years = parse_total_experience_years(profile_json.get("work_experience", []))
+            if candidate_years < req_years:
+                meets_exp = False
+                
+        req_skills_match_ratio = 1.0
+        if req_skills_total > 0:
+            matched_count = sum(1 for s in required_skills if s in strong_matches)
+            req_skills_match_ratio = matched_count / req_skills_total
             
-    req_skills_match_ratio = 1.0
-    if req_skills_total > 0:
-        matched_count = sum(1 for s in required_skills if s in strong_matches)
-        req_skills_match_ratio = matched_count / req_skills_total
-        
-    if match_score >= 80 and meets_exp and req_skills_match_ratio >= 0.70:
-        recommendation = "APPLY"
-        rationale = f"Strong match score of {match_score}%. Candidate meets required years of experience ({req_years if req_years is not None else 'N/A'} years) and matches {int(req_skills_match_ratio * 100)}% of the core required skills."
-    elif match_score >= 50:
-        recommendation = "CONSIDER"
-        rationale = f"Moderate match score of {match_score}%. Gaps identified in key skills or experience. Candidate matches {int(req_skills_match_ratio * 100)}% of core required skills."
+        if match_score >= 80 and meets_exp and req_skills_match_ratio >= 0.70:
+            recommendation = "APPLY"
+            rationale = f"Strong match score of {match_score}%. Candidate meets required years of experience ({req_years if req_years is not None else 'N/A'} years) and matches {int(req_skills_match_ratio * 100)}% of the core required skills."
+        elif match_score >= 50:
+            recommendation = "CONSIDER"
+            rationale = f"Moderate match score of {match_score}%. Gaps identified in key skills or experience. Candidate matches {int(req_skills_match_ratio * 100)}% of core required skills."
+        else:
+            recommendation = "SKIP"
+            rationale = f"Low alignment score of {match_score}%. Significant mismatch in core required skills ({int(req_skills_match_ratio * 100)}% matched) or years of experience."
     else:
-        recommendation = "SKIP"
-        rationale = f"Low alignment score of {match_score}%. Significant mismatch in core required skills ({int(req_skills_match_ratio * 100)}% matched) or years of experience."
+        match_score = 0
+        recommendation = "CONSIDER"
+        rationale = "No requirements could be extracted from the job description to run a fit analysis. Please verify the job description text."
         
     return {
         "match_score": match_score,

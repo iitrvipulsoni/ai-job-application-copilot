@@ -1326,21 +1326,68 @@ export default function Dashboard() {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                    {suggestions.map((sug) => (
-                      <div key={sug.id} style={{ 
-                        background: 'rgba(255, 255, 255, 0.02)', 
-                        border: `1px solid ${
-                          sug.status === 'APPROVED' ? 'rgba(16, 185, 129, 0.3)' : 
-                          sug.status === 'REJECTED' ? 'rgba(239, 68, 68, 0.3)' : 
-                          sug.status === 'EDITED' ? 'rgba(138, 43, 226, 0.3)' : 
-                          'var(--border-color)'
-                        }`, 
-                        borderRadius: '10px', 
-                        padding: '1.2rem',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.8rem'
-                      }}>
+                    {suggestions.map((sug) => {
+                      // Validate suggestion fields defensively
+                      const isInvalidSuggestion = 
+                        !sug.section || 
+                        !sug.suggested_text || 
+                        !sug.target_requirement || 
+                        !sug.evidence || 
+                        sug.confidence === null || 
+                        sug.confidence === undefined || 
+                        isNaN(sug.confidence);
+
+                      if (isInvalidSuggestion) {
+                        return (
+                          <div 
+                            key={sug.id} 
+                            className="card" 
+                            style={{ 
+                              borderLeft: '4px solid var(--accent-error)', 
+                              padding: '1.2rem',
+                              background: 'rgba(239, 68, 68, 0.02)',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center'
+                            }}
+                          >
+                            <div>
+                              <p style={{ color: 'var(--accent-error)', fontWeight: 600, margin: 0 }}>
+                                ⚠️ Invalid Suggestion Blocked
+                              </p>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                This suggestion contains empty or malformed details and cannot be displayed.
+                              </span>
+                            </div>
+                            <button
+                              className="btn btn-secondary"
+                              style={{ padding: '0.3rem 0.8rem', fontSize: '0.72rem', borderColor: 'var(--accent-error)', color: 'var(--accent-error)' }}
+                              onClick={() => handleUpdateSuggestionStatus(sug.id, 'REJECTED')}
+                              disabled={actionLoading}
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      const isApproveDisabled = actionLoading || !sug.suggested_text?.trim() || !sug.section?.trim() || !sug.target_requirement?.trim() || !sug.evidence?.trim();
+
+                      return (
+                        <div key={sug.id} style={{ 
+                          background: 'rgba(255, 255, 255, 0.02)', 
+                          border: `1px solid ${
+                            sug.status === 'APPROVED' ? 'rgba(16, 185, 129, 0.3)' : 
+                            sug.status === 'REJECTED' ? 'rgba(239, 68, 68, 0.3)' : 
+                            sug.status === 'EDITED' ? 'rgba(138, 43, 226, 0.3)' : 
+                            'var(--border-color)'
+                          }`, 
+                          borderRadius: '10px', 
+                          padding: '1.2rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.8rem'
+                        }}>
                         {/* Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
                           <div>
@@ -1422,13 +1469,12 @@ export default function Dashboard() {
                                 marginLeft: '0.4rem',
                                 fontWeight: 600
                               }}>
-                                {sug.evidence_status}
-                              </span>
-                            </div>
-                            <div>
+                                  <div>
                               <strong>Confidence:</strong> 
                               <span style={{ fontWeight: 600, color: '#fff', marginLeft: '0.4rem' }}>
-                                {(sug.confidence * 100).toFixed(0)}%
+                                {isNaN(sug.confidence) || sug.confidence === null || sug.confidence === undefined 
+                                  ? 'N/A' 
+                                  : (sug.confidence * 100).toFixed(0) + '%'}
                               </span>
                             </div>
                           </div>
@@ -1460,7 +1506,7 @@ export default function Dashboard() {
                             className="btn btn-primary"
                             style={{ padding: '0.4rem 1rem', fontSize: '0.78rem' }}
                             onClick={() => handleUpdateSuggestionStatus(sug.id, 'APPROVED')}
-                            disabled={actionLoading}
+                            disabled={isApproveDisabled}
                           >
                             ✓ Approve
                           </button>

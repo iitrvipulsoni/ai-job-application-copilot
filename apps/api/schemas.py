@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from uuid import UUID
 from datetime import datetime
 from typing import List, Optional, Any
@@ -186,6 +186,21 @@ class ResumeSuggestionItem(BaseModel):
     evidence_status: str  # SUPPORTED, REQUIRES_USER_CONFIRMATION, GAP_NOT_CLAIMED
     confidence: float
     requires_user_approval: bool = True
+
+    @field_validator('section', 'suggested_text', 'target_requirement', 'evidence', 'suggestion_type')
+    @classmethod
+    def prevent_empty_strings(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Field cannot be empty or whitespace.")
+        return v.strip()
+
+    @field_validator('confidence')
+    @classmethod
+    def validate_confidence(cls, v: float) -> float:
+        import math
+        if math.isnan(v) or v < 0.0 or v > 1.0:
+            raise ValueError("Confidence must be a valid float between 0.0 and 1.0.")
+        return v
 
 class ResumeSuggestionsResponse(BaseModel):
     job_id: str

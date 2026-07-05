@@ -117,8 +117,8 @@ class MockProvider(AIProvider):
                 suggestions.append({
                     "suggestion_id": "sug-k8s",
                     "section": "Gaps",
-                    "original_text": "",
-                    "suggested_text": "",
+                    "original_text": "[Requirement missing from profile]",
+                    "suggested_text": "[Gap - Candidate does not claim Kubernetes]",
                     "suggestion_type": "GAP_NOT_CLAIMED",
                     "target_requirement": "Required Tool: Kubernetes",
                     "rationale": "Kubernetes is required but not documented in your candidate profile. We leave this requirement missing to preserve truthfulness.",
