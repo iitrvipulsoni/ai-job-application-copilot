@@ -1629,11 +1629,16 @@ export default function Dashboard() {
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>
                       Profile Verification Status
                     </h3>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
                       {profile?.confirmed 
                         ? '✓ Verified. The fields below are confirmed as the single source of truth for future AI tailor evaluations.'
                         : '⚠️ Unconfirmed. Please review, edit, and click "Confirm Profile" below to activate AI suggestion guardrails.'
                       }
+                      {!profile?.confirmed && (editingProfile?.low_confidence || !editingProfile?.name || !editingProfile?.email || !editingProfile?.work_experience?.length || !editingProfile?.skills?.length) && (
+                        <span style={{ display: 'block', color: 'var(--accent-warning)', fontWeight: 600, marginTop: '0.5rem' }}>
+                          ⚠️ Some sections may need review before confirmation.
+                        </span>
+                      )}
                     </p>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>

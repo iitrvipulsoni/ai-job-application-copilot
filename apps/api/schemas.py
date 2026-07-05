@@ -156,6 +156,7 @@ class ProfileData(BaseModel):
     certifications: List[str] = []
     achievements: List[str] = []
     metrics: List[str] = []
+    low_confidence: Optional[bool] = False
 
 class ProfileResponse(BaseModel):
     id: UUID
