@@ -1,0 +1,27 @@
+# Python virtual environments & packages
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+copilot.db
+
+# Node dependencies & builds
+node_modules/
+.next/
+dist/
+build/
+out/
+.env
+.env.local
+.env.production
+.env.development
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+Database password.txt

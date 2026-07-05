@@ -1,0 +1,9 @@
+
+    Jane Doe
+    Email: jane@example.com
+    Skills: Python, Next.js, PostgreSQL, JS, Postgres
+    Experience:
+    Software Engineer at TechCorp (2023 - Present)
+    - Developed backend microservices using Python.
+    - Built frontend dashboards using Next.js.
+    
